@@ -1,54 +1,51 @@
-# Teknisk spec — BFF-mall för mikrofrontend (TMBF)
+# Teknisk spec — BFF för VAH:s processvy (PVAHBF)
 
 ## Översikt
 
-Quarkus-mall för en synkron REST BFF, utan egen datalagring och utan meddelandeintegration.
-Demonstrerar ett enda REST-klientintegrationsmönster mot en bakomliggande tjänst. Avsedd att
-kopieras, inte driftsättas som den är.
+Quarkus-tjänst (synkron REST BFF) utan egen datalagring och utan meddelandeintegration. Hämtar
+processens steg från process-vah åt mikrofrontenden `rimfrost-process-vah-fe`. Felhantering,
+vidarebefordran av `Authorization`-headern, loggkontext och hälsokontrollen kommer från
+`rimfrost-framework-bff`.
 
 ## Komponentstruktur
 
 ```text
-src/main/java/se/fk/github/templatebff
-├── TemplateBFFController      # Exempeländpunkter
-├── integration/BackendClient   # REST-klientmönster mot en bakomliggande tjänst
-├── GlobalExceptionMapper (motsv.) # Enhetlig felmappning
-└── model/                     # TaskRequest, PatchTaskRequest, PatchTaskBody
+src/main/java/se/fk/github/processvahbff
+├── ProcessVahBFFController         # GET /api/steg, GET /api/health
+├── integration/ProcessVahClient    # REST-klient som ärver ProcessvyControllerApi
+└── health/HealthCheckProducer      # Readiness-kontroll mot process-vah
 ```
 
 ## API-specifikationer
 
-Illustrativa exempeländpunkter, ingen riktig specifikation:
-
 | Metod | Sökväg | Beskrivning |
 |---|---|---|
+| GET | `/api/steg?aktivitetId={uuid}` | Processens steg för aktiviteten. Svar enligt `GetProcessvyStegResponse` i `rimfrost-framework-process-openapi` |
 | GET | `/api/health` | Egen hälsokontroll |
-| POST | `/api/task` | Exempel: hämta ärendedata |
-| PATCH | `/api/task` | Exempel: uppdatera ärendedata |
-| POST | `/api/task/done` | Exempel: slutföra ärende (kräver auktoriseringsuppgifter) |
-| GET | `/api/uppgiftsbeskrivning` | Exempel: hämta hjälptext |
+
+### Felsvar från `/api/steg`
+
+| Situation | Status | Kropp |
+|---|---|---|
+| `aktivitetId` saknas eller är inte ett UUID | `400` | Valideringsfel. process-vah anropas inte |
+| process-vah svarar `404` (okänd aktivitet eller ingen processbeskrivning) | `404` | `{"error": "Upstream error"}` |
+| process-vah svarar med annat fel | Samma status | `{"error": "Upstream error"}` |
+| process-vah går inte att nå | `502` eller `500` | Enligt `GlobalExceptionMapper` i framework-bff |
 
 ## Kafka-integration
 
-Ingen. Mallen ger inget exempel på meddelandeintegration.
+Ingen.
 
 ## Konfiguration
 
 | Egenskap | Beskrivning | Standardvärde |
 |---|---|---|
-| `quarkus.rest-client.backend.url` (`BACKEND_URL`) | Bas-URL till bakomliggande tjänst | `http://localhost:8080/regel/bekraftabeslut` |
+| `quarkus.rest-client.process-vah.url` (`PROCESS_VAH_URL`) | Bas-URL till process-vah, utan avslutande snedstreck | `http://localhost:8080` |
 | `CORS_ORIGINS` | Tillåtna ursprung för CORS | Lokala mikrofrontend-portar |
-| `quarkus.http.port` | Lyssningsport | `9009` |
+| `CORS_ALLOW_CREDENTIALS` | Tillåt cookies i CORS-anrop | `false` |
+| `quarkus.http.port` | Lyssningsport | `9005` |
 
-## Liveness
+## Liveness och readiness
 
-`/api/health` (egen), samt `/q/health` från det delade ramverket.
-
-## Kända begränsningar och framtida arbete
-
-| Begränsning | Föreslagen åtgärd |
-|---|---|
-| Ingen README finns i repot som förklarar att det är en mall och hur den ska användas | Återskapa en introduktionsdokumentation |
-| Svarsdata är otypad (skickas vidare som rå JSON) — inget exempel finns på svarsmodellering | Lägg till ett exempel om detta är ett vanligt behov |
-| Inget exempel på meddelandeintegration finns, trots att flera verkliga BFF:er i plattformen använder sådan | Bedöm om ett Kafka-exempel bör läggas till |
-| Behållarens namn/grupp är platshållarvärden som måste bytas ut manuellt | Automatisera eller tydliggör bytet i dokumentationen |
+`/api/health` (egen), samt `/q/health`. Readiness (`/q/health/ready`) innehåller kontrollen
+`process-vah`, som är `DOWN` när process-vah inte svarar inom 2 sekunder.
