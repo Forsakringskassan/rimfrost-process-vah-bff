@@ -29,7 +29,7 @@ Svar `200`, enligt `GetProcessvyStegResponse` i `rimfrost-framework-process-open
 }
 ```
 
-`status` är `KLAR`, `PAGAR` eller `KOMMANDE`.
+`status` är `KLAR`, `PAGAR` eller `KOMMANDE`. `beskrivning` är valfri och utelämnas när steget saknar beskrivning.
 
 Fel:
 
@@ -53,7 +53,9 @@ BFF:en lyssnar på port `9005`.
 
 ## Bygga och köra
 
+Bygget hämtar beroenden från Försäkringskassans GitHub Packages och kräver en Maven `settings.xml` med åtkomst dit (samma som för övriga rimfrost-repon). Den ingår inte i repot.
+
 ```sh
-./mvnw -s settings.xml clean verify   # bygg och testa
+./mvnw -s <sökväg till settings.xml> clean verify   # bygg och testa
 ./mvnw quarkus:dev                    # kör lokalt
 ```

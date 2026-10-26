@@ -10,7 +10,9 @@ import org.junit.jupiter.api.Test;
 import static com.github.tomakehurst.wiremock.client.WireMock.*;
 import static io.restassured.RestAssured.given;
 import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.hasKey;
 import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.notNullValue;
 
 @QuarkusTest
@@ -56,6 +58,7 @@ class ProcessVahBFFControllerTest
             .body("processnamn", equalTo("Vård av husdjur"))
             .body("steg", hasSize(3))
             .body("steg[0].status", equalTo("KLAR"))
+            .body("steg[0]", not(hasKey("beskrivning")))
             .body("steg[1].id", equalTo("kontrollera-ratt-till-forsakring"))
             .body("steg[1].rubrik", equalTo("Kontrollera rätt till försäkring"))
             .body("steg[1].beskrivning", equalTo("Handläggaren kontrollerar att den försäkrade har rätt till ersättning."))
@@ -161,6 +164,7 @@ class ProcessVahBFFControllerTest
    }
 
    @Test
+   @DisplayName("BFF:ens egen hälsokontroll svarar 200")
    void health_returns200WithStatusOk()
    {
       given()
