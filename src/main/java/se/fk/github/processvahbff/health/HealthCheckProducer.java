@@ -1,4 +1,4 @@
-package se.fk.github.templatebff.health;
+package se.fk.github.processvahbff.health;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Produces;
@@ -11,8 +11,8 @@ public class HealthCheckProducer
 {
    @Readiness
    @Produces
-   HealthCheck backendHealthCheck()
+   HealthCheck processVahHealthCheck()
    {
-      return UpstreamHealthCheck.fromConfig("backend", "quarkus.rest-client.backend.url", 2000);
+      return UpstreamHealthCheck.fromConfig("process-vah", "quarkus.rest-client.process-vah.url", 2000);
    }
 }
