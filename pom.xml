@@ -20,6 +20,12 @@
     </dependency>
 
     <dependency>
+      <groupId>se.fk.rimfrost.framework.process</groupId>
+      <artifactId>rimfrost-framework-process-openapi-jaxrs-spec</artifactId>
+      <version>1.0.0</version>
+    </dependency>
+
+    <dependency>
       <groupId>io.quarkus</groupId>
       <artifactId>quarkus-rest-jackson</artifactId>
     </dependency>
