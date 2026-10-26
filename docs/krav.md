@@ -55,4 +55,5 @@ vidare, på samma sätt som reglernas BFF:er gör för reglernas mikrofrontends.
 
 BFF:en anropar `GET /processvy/steg?aktivitetId={uuid}` på process-vah via en REST-klient som
 ärver det genererade gränssnittet `ProcessvyControllerApi` från
-`rimfrost-framework-process-openapi-jaxrs-spec`. Svaret skickas vidare oförändrat.
+`rimfrost-framework-process-openapi-jaxrs-spec`. Svaret returneras enligt `GetProcessvyStegResponse`.
+Valfria fält som saknas, till exempel stegets `beskrivning`, utelämnas i svaret.
