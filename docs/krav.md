@@ -1,12 +1,12 @@
-# Krav — BFF-mall för mikrofrontend (TMBF)
+# Krav — BFF för VAH:s processvy (PVAHBF)
 
 ## Bakgrund och syfte
 
-Detta är en mall, inte en driftsatt tjänst. Den ger ett team en färdig utgångspunkt för att
-bygga en ny backend-for-frontend till en regel-mikrofrontend: exempel på ändpunkter,
-indatavalidering, felhanteringsmönster, hälsokontroll och integrationstestning. Syftet är att
-nya BFF:er ska kunna byggas snabbt och konsekvent, med samma grundmönster för felhantering och
-integration som övriga BFF:er i plattformen.
+Handläggaren ska se var i VAH-processen ärendet befinner sig när hen arbetar med en uppgift.
+Processen äger sin processvy och levererar den som en egen mikrofrontend
+(`rimfrost-process-vah-fe`), som portalen laddar bredvid uppgiftens mikrofrontend. Den här
+BFF:en är mikrofrontendens backend: den hämtar processens steg från process-vah och lämnar dem
+vidare, på samma sätt som reglernas BFF:er gör för reglernas mikrofrontends.
 
 ---
 
@@ -14,47 +14,32 @@ integration som övriga BFF:er i plattformen.
 
 | Aktör | Roll |
 |---|---|
-| Utvecklingsteam | Klonar/kopierar mallen för att skapa en ny BFF |
-| En mikrofrontend byggd på motsvarande mikrofrontend-mall | Kommer att anropa den färdiga BFF:en |
-| En bakomliggande regeltjänst | Kommer att anropas av den färdiga BFF:en |
+| `rimfrost-process-vah-fe` | Anropar BFF:en för att visa processens steg |
+| `rimfrost-process-vah` | Bakomliggande tjänst som beskriver processens steg (endpoint från `rimfrost-framework-process`) |
+| Handläggare | Ser stegen i portalen. BFF:en skickar vidare handläggarens bearer-token |
 
 ---
 
 ## Funktionella krav
 
-### TMBF-FR-01 — Exempeländpunkter
+### PVAHBF-FR-01 — Processens steg
 
-- **TMBF-FR-01.1** Mallen ska tillhandahålla exempel på en ändpunkt för att hämta ärendedata
-  från en bakomliggande tjänst.
-- **TMBF-FR-01.2** Mallen ska tillhandahålla exempel på en ändpunkt för att uppdatera
-  ärendedata hos en bakomliggande tjänst.
-- **TMBF-FR-01.3** Mallen ska tillhandahålla exempel på en ändpunkt som kräver
-  auktoriseringsuppgifter och vidarebefordrar dem oförändrade till en bakomliggande tjänst.
-- **TMBF-FR-01.4** Mallen ska tillhandahålla exempel på en ändpunkt för att slutföra ett ärende.
-- **TMBF-FR-01.5** Mallen ska tillhandahålla en egen hälsokontrolländpunkt utöver ramverkets
-  standardhälsokontroller.
-
-### TMBF-FR-02 — Felhanteringsmönster
-
-- **TMBF-FR-02.1** Mallen ska demonstrera hur fel från en bakomliggande tjänst mappas till en
-  konsekvent felrespons utan att exponera interna feldetaljer.
-- **TMBF-FR-02.2** Mallen ska demonstrera indatavalidering på inkommande förfrågningar med
-  automatiskt felsvar vid ogiltig indata.
+- **PVAHBF-FR-01.1** BFF:en ska bygga på `rimfrost-framework-bff`.
+- **PVAHBF-FR-01.2** BFF:en ska erbjuda en endpoint som, givet ett aktivitets-ID, hämtar stegen
+  från process-vah enligt `rimfrost-framework-process-openapi` och returnerar dem till
+  mikrofrontenden.
+- **PVAHBF-FR-01.3** Handläggarens bearer-token ska skickas vidare till process-vah, via
+  framework-bff.
+- **PVAHBF-FR-01.4** 404 från process-vah ska returneras som 404. Övriga fel ska mappas enligt
+  framework-bff:s felhantering.
 
 ---
 
 ## Icke-funktionella krav
 
-### TMBF-NFR-01 — Testbarhet
+### PVAHBF-NFR-01 — Drift
 
-- **TMBF-NFR-01.1** Mallen ska tillhandahålla ett fungerande exempel på integrationstester mot
-  en simulerad bakomliggande tjänst, som täcker normalfall, valideringsfel och
-  otillgänglighetsfel.
-
-### TMBF-NFR-02 — Säkerhet
-
-- **TMBF-NFR-02.1** Mallen ska demonstrera att auktoriseringsuppgifter vidarebefordras till
-  bakomliggande tjänst utan att själva verifieras i BFF-lagret.
+- **PVAHBF-NFR-01.1** BFF:en ska ha en hälsokontroll mot process-vah.
 
 ---
 
@@ -62,12 +47,13 @@ integration som övriga BFF:er i plattformen.
 
 | API | Målgrupp | Specifikationsartefakt |
 |---|---|---|
-| Exempel-BFF-API | Illustrativt, ingen riktig konsument | Ingen specifikation — ersätts av den nya BFF:ns riktiga kontrakt |
+| `GET /api/steg?aktivitetId={uuid}` | `rimfrost-process-vah-fe` | Svaret följer `GetProcessvyStegResponse` i `rimfrost-framework-process-openapi` |
 
 ---
 
-## Integration med en bakomliggande regeltjänst
+## Integration med process-vah
 
-Mallen demonstrerar ett enda, generiskt integrationsmönster mot en bakomliggande tjänst via ett
-REST-klientgränssnitt knutet till en enskild konfigurationsegenskap. Ett team som bygger en ny
-BFF på mallen ersätter detta med sin egen bakomliggande tjänst och datamodell.
+BFF:en anropar `GET /processvy/steg?aktivitetId={uuid}` på process-vah via en REST-klient som
+ärver det genererade gränssnittet `ProcessvyControllerApi` från
+`rimfrost-framework-process-openapi-jaxrs-spec`. Svaret returneras enligt `GetProcessvyStegResponse`.
+Valfria fält som saknas, till exempel stegets `beskrivning`, utelämnas i svaret.
