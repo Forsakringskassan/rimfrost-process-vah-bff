@@ -1,10 +1,10 @@
-package se.fk.github.templatebff.integration;
+package se.fk.github.vahbff.integration;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import org.eclipse.microprofile.rest.client.inject.RegisterRestClient;
-import se.fk.github.templatebff.model.PatchTaskBody;
+import se.fk.github.vahbff.model.PatchTaskBody;
 
 @RegisterRestClient(configKey = "backend")
 @Produces(MediaType.APPLICATION_JSON)

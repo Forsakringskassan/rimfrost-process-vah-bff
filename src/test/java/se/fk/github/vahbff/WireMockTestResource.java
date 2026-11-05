@@ -1,4 +1,4 @@
-package se.fk.github.templatebff;
+package se.fk.github.vahbff;
 
 import com.github.tomakehurst.wiremock.WireMockServer;
 import io.quarkus.test.common.QuarkusTestResourceLifecycleManager;

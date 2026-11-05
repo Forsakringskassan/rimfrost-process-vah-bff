@@ -1,4 +1,4 @@
-package se.fk.github.templatebff;
+package se.fk.github.vahbff;
 
 import io.quarkus.test.common.QuarkusTestResource;
 import io.quarkus.test.junit.QuarkusTest;
@@ -13,7 +13,7 @@ import static org.hamcrest.Matchers.notNullValue;
 
 @QuarkusTest
 @QuarkusTestResource(WireMockTestResource.class)
-class TemplateBFFControllerTest
+class VahBffControllerTest
 {
 
    @BeforeEach
