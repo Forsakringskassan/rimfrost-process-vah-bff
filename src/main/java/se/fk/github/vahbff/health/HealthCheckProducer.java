@@ -1,4 +1,4 @@
-package se.fk.github.templatebff.health;
+package se.fk.github.vahbff.health;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Produces;

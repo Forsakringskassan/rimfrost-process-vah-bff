@@ -1,4 +1,4 @@
-package se.fk.github.templatebff.model;
+package se.fk.github.vahbff.model;
 
 import jakarta.validation.constraints.NotBlank;
 
