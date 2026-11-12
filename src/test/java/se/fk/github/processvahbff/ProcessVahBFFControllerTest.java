@@ -1,5 +1,6 @@
 package se.fk.github.processvahbff;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.tomakehurst.wiremock.http.Fault;
 import io.quarkus.test.common.QuarkusTestResource;
 import io.quarkus.test.junit.QuarkusTest;
@@ -9,6 +10,7 @@ import org.junit.jupiter.api.Test;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.*;
 import static io.restassured.RestAssured.given;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasKey;
 import static org.hamcrest.Matchers.hasSize;
@@ -19,6 +21,7 @@ import static org.hamcrest.Matchers.notNullValue;
 @QuarkusTestResource(WireMockTestResource.class)
 class ProcessVahBFFControllerTest
 {
+   private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
    private static final String AKTIVITET_ID = "3f2c8a1e-6b4d-4c7a-9e21-5d8f0b7a1c34";
    private static final String STEG_PATH = "/processvy/steg?aktivitetId=" + AKTIVITET_ID;
 
@@ -30,6 +33,29 @@ class ProcessVahBFFControllerTest
              { "id": "registrera-ansokan", "rubrik": "Registrera ansökan", "status": "KLAR" },
              { "id": "kontrollera-ratt-till-forsakring", "rubrik": "Kontrollera rätt till försäkring",
                "beskrivning": "Handläggaren kontrollerar att den försäkrade har rätt till ersättning.", "status": "PAGAR" },
+             { "id": "besluta", "rubrik": "Besluta", "status": "KOMMANDE" }
+           ]
+         }
+         """;
+
+   private static final String STEG_RESPONSE_MED_UNDERSTEG = """
+         {
+           "processId": "vah",
+           "processnamn": "Vård av husdjur",
+           "steg": [
+             { "id": "registrera-ansokan", "rubrik": "Registrera ansökan", "status": "KLAR" },
+             { "id": "bedoma", "rubrik": "Bedöma", "status": "PAGAR",
+               "steg": [
+                 { "id": "kontrollera-forsakring", "rubrik": "Kontrollera försäkring", "status": "KLAR" },
+                 { "id": "kontrollera-djur", "rubrik": "Kontrollera djur", "status": "PAGAR",
+                   "beskrivning": "Kontroller av djuret.",
+                   "steg": [
+                     { "id": "kontrollera-agare", "rubrik": "Kontrollera ägare", "status": "KLAR" },
+                     { "id": "kontrollera-vardbehov", "rubrik": "Kontrollera vårdbehov", "status": "KOMMANDE" }
+                   ]
+                 }
+               ]
+             },
              { "id": "besluta", "rubrik": "Besluta", "status": "KOMMANDE" }
            ]
          }
@@ -64,6 +90,28 @@ class ProcessVahBFFControllerTest
             .body("steg[1].beskrivning", equalTo("Handläggaren kontrollerar att den försäkrade har rätt till ersättning."))
             .body("steg[1].status", equalTo("PAGAR"))
             .body("steg[2].status", equalTo("KOMMANDE"));
+   }
+
+   @Test
+   @DisplayName("PVAHBF-FR-01.5, PVAHBF-NFR-01.2: understeg i två nivåer skickas vidare oförändrade")
+   void getSteg_forwardsUnderstegUnchanged() throws Exception
+   {
+      WireMockTestResource.getServer().stubFor(get(urlEqualTo(STEG_PATH))
+            .willReturn(okJson(STEG_RESPONSE_MED_UNDERSTEG)));
+
+      String body = given()
+            .queryParam("aktivitetId", AKTIVITET_ID)
+            .when()
+            .get("/api/steg")
+            .then()
+            .statusCode(200)
+            .body("steg[0]", not(hasKey("steg")))
+            .body("steg[1].steg[0]", not(hasKey("steg")))
+            .body("steg[1].steg[1].steg[1]", not(hasKey("steg")))
+            .extract().asString();
+
+      // JsonNode equality is deep: same fields and values on every level, in any field order
+      assertEquals(OBJECT_MAPPER.readTree(STEG_RESPONSE_MED_UNDERSTEG), OBJECT_MAPPER.readTree(body));
    }
 
    @Test
