@@ -61,5 +61,5 @@ BFF:en anropar `GET /processvy/steg?aktivitetId={uuid}` på process-vah via en R
 ärver det genererade gränssnittet `ProcessvyControllerApi` från
 `rimfrost-framework-process-openapi-jaxrs-spec`. Svaret returneras enligt `GetProcessvyStegResponse`.
 Valfria fält som saknas, till exempel stegets `beskrivning`, utelämnas i svaret. Det gäller även
-`steg`: ett steg med understeg har fältet `steg` (högst två nivåer under svarets `steg[]`, från
+`steg`: ett steg med understeg har fältet `steg` (högst två nivåer under svarets `steg[]`, från och med
 kontraktets version 1.1.0), och ett steg utan understeg saknar fältet.

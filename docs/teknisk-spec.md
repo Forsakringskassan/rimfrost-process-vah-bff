@@ -20,7 +20,7 @@ src/main/java/se/fk/github/processvahbff
 
 | Metod | Sökväg | Beskrivning |
 |---|---|---|
-| GET | `/api/steg?aktivitetId={uuid}` | Processens steg för aktiviteten. Svar enligt `GetProcessvyStegResponse` i `rimfrost-framework-process-openapi` 1.1.0, inklusive understeg |
+| GET | `/api/steg?aktivitetId={uuid}` | Processens steg för aktiviteten. Svar enligt `GetProcessvyStegResponse` i `rimfrost-framework-process-openapi` (från och med 1.1.0), inklusive understeg |
 | GET | `/api/health` | Egen hälsokontroll |
 
 ### Understeg

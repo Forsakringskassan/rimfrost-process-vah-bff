@@ -105,9 +105,6 @@ class ProcessVahBFFControllerTest
             .get("/api/steg")
             .then()
             .statusCode(200)
-            .body("steg[0]", not(hasKey("steg")))
-            .body("steg[1].steg[0]", not(hasKey("steg")))
-            .body("steg[1].steg[1].steg[1]", not(hasKey("steg")))
             .extract().asString();
 
       // JsonNode equality is deep: same fields and values on every level, in any field order
