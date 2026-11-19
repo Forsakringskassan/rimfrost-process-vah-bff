@@ -2,6 +2,13 @@
 
 Changelog of rimfrost-process-vah-bff.
 
+## 0.1.1 (2026-11-19)
+
+### Bug Fixes
+
+-  bump rimfrost-framework-bff from 0.0.3 to 0.0.4 ([5140d](https://github.com/Forsakringskassan/rimfrost-process-vah-bff/commit/5140dde63e608d4) Ulf Slunga)  
+-  **deps**  update dependency se.fk.rimfrost.framework.bff:rimfrost-framework-bff to v0.0.4 ([57b2e](https://github.com/Forsakringskassan/rimfrost-process-vah-bff/commit/57b2ea972125274) renovate[bot])  
+
 ## 0.1.0 (2026-11-12)
 
 ### Features
